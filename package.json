@@ -1,0 +1,33 @@
+{
+  "name": "hapi-qs",
+  "version": "1.0.0",
+  "description": "Hapi plugin to bring back qs support",
+  "main": "index.js",
+  "scripts": {
+    "test": "node_modules/mocha/bin/mocha \"tests/**/*.test.js\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/daf-spr/hapi-qs.git"
+  },
+  "keywords": [
+    "hapi",
+    "hapi-qs"
+  ],
+  "author": "Damian Andres Fortuna",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/daf-spr/hapi-qs/issues"
+  },
+  "homepage": "https://github.com/daf-spr/hapi-qs#readme",
+  "dependencies": {
+    "joi": "^7.0.1",
+    "qs": "^6.0.1"
+  },
+  "devDependencies": {
+    "chai": "^3.4.1",
+    "hapi": "https://github.com/hapijs/hapi.git#master",
+    "mocha": "^2.3.4",
+    "request-promise": "^1.0.2"
+  }
+}
