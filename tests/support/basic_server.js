@@ -7,6 +7,16 @@ exports.start = function(port, pluginOptions, callback) {
 
   server.connection({ port: port });
 
+  const preparePayloadRoute = function (method) {
+    server.route({
+      method: method,
+      path: '/',
+      handler: function (request, reply) {
+        return reply(request.payload);
+      }
+    });
+  };
+
   const onRegister = function () {
     server.route({
       method: 'GET',
@@ -16,13 +26,10 @@ exports.start = function(port, pluginOptions, callback) {
       }
     });
 
-    server.route({
-      method: 'POST',
-      path: '/',
-      handler: function (request, reply) {
-        return reply(request.payload);
-      }
-    });
+    preparePayloadRoute('POST');
+    preparePayloadRoute('PUT');
+    preparePayloadRoute('PATCH');
+    preparePayloadRoute('DELETE');
 
     server.start(() => callback(null, server));
   };
@@ -37,4 +44,3 @@ exports.start = function(port, pluginOptions, callback) {
     onRegister()
   });
 };
-
