@@ -26,7 +26,7 @@
   },
   "devDependencies": {
     "chai": "^3.4.1",
-    "hapi": "https://github.com/hapijs/hapi.git#master",
+    "hapi": "^12.1.0",
     "mocha": "^2.3.4",
     "request-promise": "^1.0.2"
   }
