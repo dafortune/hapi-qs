@@ -44,7 +44,7 @@ Usage
 ```
 
 ### Parsing payload
-Payload will only be parsed if content-type is set to a kind of `x-www-form-urlencoded`
+Payload will only be parsed if content-type is set to a kind of `x-www-form-urlencoded` or `multipart/form-data`
 
 ```javascript
   server.route({
@@ -59,7 +59,7 @@ Payload will only be parsed if content-type is set to a kind of `x-www-form-urle
 ### Options
   * qsOptions (default `undefined`): This object is past directly to Qs parse method ([more info](https://github.com/ljharb/qs))
   * queryString (default `true`): whether to parse query string
-  * payload: whether to parse payload (it is valid only when content-type header is a kind of `x-www-form-urlencoded`)
+  * payload: whether to parse payload (it is valid only when content-type header is a kind of `x-www-form-urlencoded` or `multipart/form-data`)
 
 
 ## Running tests

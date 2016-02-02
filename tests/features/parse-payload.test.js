@@ -5,17 +5,22 @@ const rp = require('request-promise');
 const config = require('../support/basic_config');
 const expect = require('chai').expect;
 
-const payloadExamples = function (method) {
+const payloadExamples = function (method, isMultipart) {
   describe('Parsing query strings', function() {
 
     before(function() {
       this.request = function(form, json) {
-        return rp({
+        var requestOptions = {
           method: method,
           uri: 'http://localhost:' + config.port,
-          form: form,
           json: json
-        })
+        };
+        if (isMultipart) {
+          requestOptions.formData = form;
+        } else {
+          requestOptions.form = form;
+        }
+        return rp(requestOptions)
         .then(body => {
           this.payload = body;
         });
@@ -139,18 +144,38 @@ const payloadExamples = function (method) {
   });
 };
 
-describe('POST method', function() {
-  payloadExamples('POST');
+describe('application/x-www-form-urlencoded data', function() {
+  describe('POST method', function() {
+    payloadExamples('POST');
+  });
+
+  describe('PUT method', function() {
+    payloadExamples('PUT');
+  });
+
+  describe('PATCH method', function() {
+    payloadExamples('PATCH');
+  });
+
+  describe('DELETE method', function() {
+    payloadExamples('DELETE');
+  });
 });
 
-describe('PUT method', function() {
-  payloadExamples('PUT');
-});
+describe('multipart/form-data data', function() {
+  describe('POST method', function() {
+    payloadExamples('POST', true);
+  });
 
-describe('PATCH method', function() {
-  payloadExamples('PATCH');
-});
+  describe('PUT method', function() {
+    payloadExamples('PUT', true);
+  });
 
-describe('DELETE method', function() {
-  payloadExamples('DELETE');
+  describe('PATCH method', function() {
+    payloadExamples('PATCH', true);
+  });
+
+  describe('DELETE method', function() {
+    payloadExamples('DELETE', true);
+  });
 });
