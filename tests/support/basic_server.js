@@ -2,15 +2,23 @@
 
 const Hapi = require('hapi');
 
-exports.start = function(port, pluginOptions, callback) {
-  const server = new Hapi.Server();
+exports.start = function(port, pluginOptions, serverOptions, callback) {
+  serverOptions = serverOptions || {};
+
+  const server = new Hapi.Server({
+    connections: {
+      router: {
+        stripTrailingSlash: !!serverOptions.stripTrailingSlash
+      }
+    }
+  });
 
   server.connection({ port: port });
 
   const preparePayloadRoute = function (method) {
     server.route({
       method: method,
-      path: '/',
+      path: '/test',
       handler: function (request, reply) {
         return reply(request.payload);
       }
@@ -20,7 +28,7 @@ exports.start = function(port, pluginOptions, callback) {
   const onRegister = function () {
     server.route({
       method: 'GET',
-      path: '/',
+      path: '/test',
       handler: function (request, reply) {
         return reply(request.query);
       }

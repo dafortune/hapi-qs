@@ -5,14 +5,14 @@ const rp = require('request-promise');
 const config = require('../support/basic_config');
 const expect = require('chai').expect;
 
-const payloadExamples = function (method, isMultipart) {
+const payloadExamples = function (method, isMultipart, stripTrailingSlash) {
   describe('Parsing query strings', function() {
 
     before(function() {
       this.request = function(form, json) {
         var requestOptions = {
           method: method,
-          uri: 'http://localhost:' + config.port,
+          uri: 'http://localhost:' + config.port + '/test' + (stripTrailingSlash ? '/' : ''),
           json: json
         };
         if (isMultipart) {
@@ -30,7 +30,7 @@ const payloadExamples = function (method, isMultipart) {
     describe('when qsOptions are not set', function() {
 
       before(function(done) {
-        this.serverStart(undefined, done);
+        this.serverStart(undefined, { stripTrailingSlash: stripTrailingSlash }, done);
       });
 
       after(function(done) {
@@ -59,7 +59,7 @@ const payloadExamples = function (method, isMultipart) {
     describe('when qsOptions are set', function() {
 
       before(function(done) {
-        this.serverStart({ qsOptions: { parseArrays: false } }, done);
+        this.serverStart({ qsOptions: { parseArrays: false } }, { stripTrailingSlash: stripTrailingSlash }, done);
       });
 
       after(function(done) {
@@ -83,7 +83,7 @@ const payloadExamples = function (method, isMultipart) {
     describe('when payload parsing is disabled', function() {
 
       before(function(done) {
-        this.serverStart({ payload: false }, done);
+        this.serverStart({ payload: false }, { stripTrailingSlash: stripTrailingSlash }, done);
       });
 
       after(function(done) {
@@ -103,7 +103,7 @@ const payloadExamples = function (method, isMultipart) {
     describe('when payload is not urlencoded', function() {
 
       before(function(done) {
-        this.serverStart(undefined, done);
+        this.serverStart(undefined, { stripTrailingSlash: stripTrailingSlash }, done);
       });
 
       after(function(done) {
@@ -124,7 +124,7 @@ const payloadExamples = function (method, isMultipart) {
     describe('when there is no payload', function() {
 
       before(function(done) {
-        this.serverStart(undefined, done);
+        this.serverStart(undefined, { stripTrailingSlash: stripTrailingSlash }, done);
       });
 
       after(function(done) {
@@ -144,38 +144,48 @@ const payloadExamples = function (method, isMultipart) {
   });
 };
 
-describe('application/x-www-form-urlencoded data', function() {
-  describe('POST method', function() {
-    payloadExamples('POST');
-  });
-
-  describe('PUT method', function() {
-    payloadExamples('PUT');
-  });
-
-  describe('PATCH method', function() {
-    payloadExamples('PATCH');
-  });
-
-  describe('DELETE method', function() {
-    payloadExamples('DELETE');
-  });
+describe('when stripTrailingSlash is true', function() {
+  parsePayloadExample(true);
 });
 
-describe('multipart/form-data data', function() {
-  describe('POST method', function() {
-    payloadExamples('POST', true);
-  });
-
-  describe('PUT method', function() {
-    payloadExamples('PUT', true);
-  });
-
-  describe('PATCH method', function() {
-    payloadExamples('PATCH', true);
-  });
-
-  describe('DELETE method', function() {
-    payloadExamples('DELETE', true);
-  });
+describe('when stripTrailingSlash is false', function() {
+  parsePayloadExample(false);
 });
+
+function parsePayloadExample(stripTrailingSlash) {
+  describe('application/x-www-form-urlencoded data', function() {
+    describe('POST method', function() {
+      payloadExamples('POST', false, stripTrailingSlash);
+    });
+
+    describe('PUT method', function() {
+      payloadExamples('PUT', false, stripTrailingSlash);
+    });
+
+    describe('PATCH method', function() {
+      payloadExamples('PATCH', false, stripTrailingSlash);
+    });
+
+    describe('DELETE method', function() {
+      payloadExamples('DELETE', false, stripTrailingSlash);
+    });
+  });
+
+  describe('multipart/form-data data', function() {
+    describe('POST method', function() {
+      payloadExamples('POST', true, stripTrailingSlash);
+    });
+
+    describe('PUT method', function() {
+      payloadExamples('PUT', true, stripTrailingSlash);
+    });
+
+    describe('PATCH method', function() {
+      payloadExamples('PATCH', true, stripTrailingSlash);
+    });
+
+    describe('DELETE method', function() {
+      payloadExamples('DELETE', true, stripTrailingSlash);
+    });
+  });
+}

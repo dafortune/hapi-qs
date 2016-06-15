@@ -4,13 +4,23 @@ const config = require('../support/basic_config');
 const rp = require('request-promise');
 const expect = require('chai').expect;
 
-describe('Parsing query strings', function() {
 
+describe('Parsing query strings', function() {
+  describe('when stripTrailingSlash is true', function() {
+    parseQueryStringExample(true);
+  });
+
+  describe('when stripTrailingSlash is false', function() {
+    parseQueryStringExample(false);
+  });
+});
+
+function parseQueryStringExample(stripTrailingSlash) {
   before(function() {
     this.request = function(qs) {
       return rp({
         method: 'GET',
-        uri: 'http://localhost:' + config.port,
+        uri: 'http://localhost:' + config.port + '/test' + (stripTrailingSlash ? '/' : ''),
         qs: qs,
         json: true
       })
@@ -23,7 +33,7 @@ describe('Parsing query strings', function() {
   describe('when qsOptions are not set', function() {
 
     before(function(done) {
-      this.serverStart(undefined, done);
+      this.serverStart(undefined, { stripTrailingSlash: stripTrailingSlash }, done);
     });
 
     after(function(done) {
@@ -52,7 +62,7 @@ describe('Parsing query strings', function() {
   describe('when qsOptions are set', function() {
 
     before(function(done) {
-      this.serverStart({ qsOptions: { parseArrays: false } }, done);
+      this.serverStart({ qsOptions: { parseArrays: false } }, { stripTrailingSlash: stripTrailingSlash }, done);
     });
 
     after(function(done) {
@@ -76,7 +86,7 @@ describe('Parsing query strings', function() {
   describe('when query strings parsing is disabled', function() {
 
     before(function(done) {
-      this.serverStart({ queryString: false }, done);
+      this.serverStart({ queryString: false }, { stripTrailingSlash: stripTrailingSlash }, done);
     });
 
     after(function(done) {
@@ -96,7 +106,7 @@ describe('Parsing query strings', function() {
   describe('when there is no query string', function() {
 
     before(function(done) {
-      this.serverStart(undefined, done);
+      this.serverStart(undefined, { stripTrailingSlash: stripTrailingSlash }, done);
     });
 
     after(function(done) {
@@ -112,5 +122,4 @@ describe('Parsing query strings', function() {
     });
 
   });
-
-});
+}
