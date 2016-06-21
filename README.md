@@ -1,6 +1,6 @@
 # Hapi QS
 
-[![Build Status](https://travis-ci.org/daf-spr/hapi-qs.svg?branch=master)](https://travis-ci.org/daf-spr/hapi-qs)
+[![Build Status](https://travis-ci.org/dafortune/hapi-qs.svg?branch=master)](https://travis-ci.org/daf-spr/hapi-qs)
 
 Hapi plugin that brings back qs support for Hapi 12.
 [Qs](https://github.com/ljharb/qs) support has been removed from Hapi 12 (https://github.com/hapijs/hapi/issues/2985), this plugin aims to bring it back.
