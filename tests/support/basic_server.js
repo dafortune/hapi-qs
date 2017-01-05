@@ -15,12 +15,15 @@ exports.start = function(port, pluginOptions, serverOptions, callback) {
 
   server.connection({ port: port });
 
-  const preparePayloadRoute = function (method) {
+  const preparePayloadRoute = function (method, options) {
     server.route({
       method: method,
-      path: '/test',
-      handler: function (request, reply) {
-        return reply(request.payload);
+      path: options.path,
+      config: {
+        payload: Object.assign({}, options.config && options.config.payload),
+        handler: function (request, reply) {
+          return reply(request.payload);
+        }
       }
     });
   };
@@ -34,10 +37,25 @@ exports.start = function(port, pluginOptions, serverOptions, callback) {
       }
     });
 
-    preparePayloadRoute('POST');
-    preparePayloadRoute('PUT');
-    preparePayloadRoute('PATCH');
-    preparePayloadRoute('DELETE');
+    preparePayloadRoute('POST', { path: '/test' });
+    preparePayloadRoute('PUT', { path: '/test' });
+    preparePayloadRoute('PATCH', { path: '/test' });
+    preparePayloadRoute('DELETE', { path: '/test' });
+
+    const streamPayload = {
+      path: '/test-stream',
+      config: {
+        payload: {
+          output: 'stream',
+          parse: false
+        }
+      }
+    };
+
+    preparePayloadRoute('POST', streamPayload);
+    preparePayloadRoute('PUT', streamPayload);
+    preparePayloadRoute('PATCH', streamPayload);
+    preparePayloadRoute('DELETE', streamPayload);
 
     server.start(() => callback(null, server));
   };

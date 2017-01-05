@@ -7,13 +7,15 @@ const expect = require('chai').expect;
 
 const payloadExamples = function (method, isMultipart, stripTrailingSlash) {
   describe('Parsing query strings', function() {
+    let testStreamPath;
+    let testPath;
 
     before(function() {
-      this.request = function(form, json) {
+      this.request = function(form, options) {
         var requestOptions = {
           method: method,
-          uri: 'http://localhost:' + config.port + '/test' + (stripTrailingSlash ? '/' : ''),
-          json: json
+          uri: 'http://localhost:' + config.port + options.path,
+          json: options.json
         };
         if (isMultipart) {
           requestOptions.formData = form;
@@ -25,6 +27,9 @@ const payloadExamples = function (method, isMultipart, stripTrailingSlash) {
           this.payload = body;
         });
       };
+
+      testPath = '/test' + (stripTrailingSlash ? '/' : '');
+      testStreamPath = '/test-stream' + (stripTrailingSlash ? '/' : '');
     });
 
     describe('when qsOptions are not set', function() {
@@ -41,7 +46,7 @@ const payloadExamples = function (method, isMultipart, stripTrailingSlash) {
         return this.request({
           'i': 'v/r',
           'unicorns[0][color]': 'blue'
-        }, true);
+        }, { path: testPath, json: true });
       });
 
       it('parses simple payload attribute', function() {
@@ -69,7 +74,7 @@ const payloadExamples = function (method, isMultipart, stripTrailingSlash) {
       beforeEach(function() {
         return this.request({
           'unicorns[0][color]': 'blue'
-        }, true);
+        }, { path: testPath, json: true });
       });
 
       it('uses qs options', function() {
@@ -91,7 +96,7 @@ const payloadExamples = function (method, isMultipart, stripTrailingSlash) {
       });
 
       beforeEach(function() {
-        return this.request({ 'unicorns[0][color]': 'blue' }, true);
+        return this.request({ 'unicorns[0][color]': 'blue' }, { path: testPath, json: true });
       });
 
       it('does not parse complex qs attribute', function() {
@@ -111,7 +116,7 @@ const payloadExamples = function (method, isMultipart, stripTrailingSlash) {
       });
 
       beforeEach(function() {
-        return this.request(null, { 'simple': true, 'unicorns[0][color]': 'blue' });
+        return this.request(null, { path: testPath, json: { 'simple': true, 'unicorns[0][color]': 'blue' } });
       });
 
       it('does not parse payload', function() {
@@ -132,11 +137,31 @@ const payloadExamples = function (method, isMultipart, stripTrailingSlash) {
       });
 
       beforeEach(function() {
-        return this.request(null, true);
+        return this.request(null, { path: testPath, json: true });
       });
 
       it('does not fail', function() {
         expect(this.query).to.equal(undefined);
+      });
+
+    });
+
+    describe('when it is in stream mode', function() {
+
+      before(function(done) {
+        this.serverStart(undefined, { stripTrailingSlash: stripTrailingSlash }, done);
+      });
+
+      after(function(done) {
+        this.server.stop(done);
+      });
+
+      beforeEach(function() {
+        return this.request({ test: 'thisIsMyBigTest' }, { path: testStreamPath });
+      });
+
+      it('does not parse payload', function() {
+        expect(this.payload).to.contain('thisIsMyBigTest');
       });
 
     });
