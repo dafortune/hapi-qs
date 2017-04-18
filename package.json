@@ -21,14 +21,16 @@
   },
   "homepage": "https://github.com/daf-spr/hapi-qs#readme",
   "dependencies": {
-    "hapi": "^16.1.0",
     "joi": "^7.0.1",
     "qs": "^6.0.1"
   },
   "devDependencies": {
     "chai": "^3.4.1",
-    "hapi": "^12.1.0",
     "mocha": "^2.3.4",
-    "request-promise": "^1.0.2"
+    "request-promise": "^1.0.2",
+    "hapi": "^16.1.1"
+  },
+  "peerDependencies": {
+    "hapi": ">=12.x.x"
   }
 }
