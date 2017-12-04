@@ -4,6 +4,9 @@ const basicServer = require('../support/basic_server');
 const rp = require('request-promise');
 const config = require('../support/basic_config');
 const expect = require('chai').expect;
+const querystring = require('querystring');
+const FormData = require('form-data');
+const streamToPromise = require('stream-to-promise');
 
 const payloadExamples = function (method, isMultipart, stripTrailingSlash) {
   describe('Parsing query strings', function() {
@@ -11,39 +14,59 @@ const payloadExamples = function (method, isMultipart, stripTrailingSlash) {
     let testPath;
 
     before(function() {
-      this.request = function(form, options) {
-        var requestOptions = {
+      this.request = async function(form, options) {
+        let requestOptions = {
           method: method,
-          uri: 'http://localhost:' + config.port + options.path,
-          json: options.json
+          url: options.path,
         };
-        if (isMultipart) {
-          requestOptions.formData = form;
-        } else {
-          requestOptions.form = form;
+
+        if (form) {
+          if (isMultipart) {
+            
+              let formData = new FormData();
+              for (let key in form) {
+                formData.append(key, form[key]);
+              }
+              requestOptions.headers = formData.getHeaders();
+              formData = await streamToPromise(formData);
+              requestOptions.payload = formData;
+              //console.log(requestOptions.payload);
+          } else {
+            requestOptions.headers = {
+              'Content-Type': 'application/x-www-form-urlencoded'
+            };
+            requestOptions.payload = querystring.stringify(form);
+          }
         }
-        return rp(requestOptions)
-        .then(body => {
-          this.payload = body;
-        });
+        if (typeof options.json === 'object') {
+          requestOptions.headers = {
+            'Content-Type': 'application/json'
+          };
+          requestOptions.payload = JSON.stringify(options.json);
+        }
+        let res = await this.server.inject(requestOptions);
+        if (res.payload.length === 0) {
+          return undefined;
+        }
+        if (options.json) {
+          return JSON.parse(res.payload);
+        } else {
+          return res.payload;
+        }
       };
 
       testPath = '/test' + (stripTrailingSlash ? '/' : '');
       testStreamPath = '/test-stream' + (stripTrailingSlash ? '/' : '');
     });
-
+    
     describe('when qsOptions are not set', function() {
 
-      before(function(done) {
-        this.serverStart(undefined, { stripTrailingSlash: stripTrailingSlash }, done);
+      before(async function() {
+        await this.serverStart(undefined, { stripTrailingSlash: stripTrailingSlash });
       });
 
-      after(function(done) {
-        this.server.stop(done);
-      });
-
-      beforeEach(function() {
-        return this.request({
+      beforeEach(async function() {
+        this.payload = await this.request({
           'i': 'v/r',
           'unicorns[0][color]': 'blue'
         }, { path: testPath, json: true });
@@ -63,16 +86,12 @@ const payloadExamples = function (method, isMultipart, stripTrailingSlash) {
 
     describe('when qsOptions are set', function() {
 
-      before(function(done) {
-        this.serverStart({ qsOptions: { parseArrays: false } }, { stripTrailingSlash: stripTrailingSlash }, done);
+      before(async function() {
+        await this.serverStart({ qsOptions: { parseArrays: false } }, { stripTrailingSlash: stripTrailingSlash });
       });
 
-      after(function(done) {
-        this.server.stop(done);
-      });
-
-      beforeEach(function() {
-        return this.request({
+      beforeEach(async function() {
+        this.payload = await this.request({
           'unicorns[0][color]': 'blue'
         }, { path: testPath, json: true });
       });
@@ -87,16 +106,12 @@ const payloadExamples = function (method, isMultipart, stripTrailingSlash) {
 
     describe('when payload parsing is disabled', function() {
 
-      before(function(done) {
-        this.serverStart({ payload: false }, { stripTrailingSlash: stripTrailingSlash }, done);
+      before(async function() {
+        await this.serverStart({ payload: false }, { stripTrailingSlash: stripTrailingSlash });
       });
 
-      after(function(done) {
-        this.server.stop(done);
-      });
-
-      beforeEach(function() {
-        return this.request({ 'unicorns[0][color]': 'blue' }, { path: testPath, json: true });
+      beforeEach(async function() {
+        this.payload = await this.request({ 'unicorns[0][color]': 'blue' }, { path: testPath, json: true });
       });
 
       it('does not parse complex qs attribute', function() {
@@ -107,16 +122,12 @@ const payloadExamples = function (method, isMultipart, stripTrailingSlash) {
 
     describe('when payload is not urlencoded', function() {
 
-      before(function(done) {
-        this.serverStart(undefined, { stripTrailingSlash: stripTrailingSlash }, done);
+      before(async function() {
+        await this.serverStart(undefined, { stripTrailingSlash: stripTrailingSlash });
       });
 
-      after(function(done) {
-        this.server.stop(done);
-      });
-
-      beforeEach(function() {
-        return this.request(null, { path: testPath, json: { 'simple': true, 'unicorns[0][color]': 'blue' } });
+      beforeEach(async function() {
+        this.payload = await this.request(null, { path: testPath, json: { 'simple': true, 'unicorns[0][color]': 'blue' } });
       });
 
       it('does not parse payload', function() {
@@ -128,36 +139,28 @@ const payloadExamples = function (method, isMultipart, stripTrailingSlash) {
 
     describe('when there is no payload', function() {
 
-      before(function(done) {
-        this.serverStart(undefined, { stripTrailingSlash: stripTrailingSlash }, done);
+      before(async function() {
+        await this.serverStart(undefined, { stripTrailingSlash: stripTrailingSlash });
       });
 
-      after(function(done) {
-        this.server.stop(done);
-      });
-
-      beforeEach(function() {
-        return this.request(null, { path: testPath, json: true });
+      beforeEach(async function() {
+        this.payload = await this.request(null, { path: testPath, json: true });
       });
 
       it('does not fail', function() {
-        expect(this.query).to.equal(undefined);
+        expect(this.payload).to.equal(undefined);
       });
 
     });
 
     describe('when it is in stream mode', function() {
 
-      before(function(done) {
-        this.serverStart(undefined, { stripTrailingSlash: stripTrailingSlash }, done);
+      before(async function() {
+        await this.serverStart(undefined, { stripTrailingSlash: stripTrailingSlash });
       });
 
-      after(function(done) {
-        this.server.stop(done);
-      });
-
-      beforeEach(function() {
-        return this.request({ test: 'thisIsMyBigTest' }, { path: testStreamPath });
+      beforeEach(async function() {
+        this.payload = await this.request({ test: 'thisIsMyBigTest' }, { path: testStreamPath });
       });
 
       it('does not parse payload', function() {

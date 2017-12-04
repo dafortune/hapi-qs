@@ -1,19 +1,17 @@
 'use strict';
 
 const Hapi = require('hapi');
+const streamToPromise = require('stream-to-promise');
+const stream = require('stream');
 
-exports.start = function(port, pluginOptions, serverOptions, callback) {
+exports.start = async (port, pluginOptions, serverOptions) => {
   serverOptions = serverOptions || {};
 
   const server = new Hapi.Server({
-    connections: {
-      router: {
-        stripTrailingSlash: !!serverOptions.stripTrailingSlash
-      }
+    router: {
+      stripTrailingSlash: !!serverOptions.stripTrailingSlash
     }
   });
-
-  server.connection({ port: port });
 
   const preparePayloadRoute = function (method, options) {
     server.route({
@@ -21,52 +19,48 @@ exports.start = function(port, pluginOptions, serverOptions, callback) {
       path: options.path,
       config: {
         payload: Object.assign({}, options.config && options.config.payload),
-        handler: function (request, reply) {
-          return reply(request.payload);
+        handler: function (request, h) {
+          if (request.payload instanceof stream.Readable) {
+              return streamToPromise(request.payload);
+          }
+          return request.payload;
         }
       }
     });
   };
 
-  const onRegister = function () {
-    server.route({
-      method: 'GET',
-      path: '/test',
-      handler: function (request, reply) {
-        return reply(request.query);
-      }
-    });
-
-    preparePayloadRoute('POST', { path: '/test' });
-    preparePayloadRoute('PUT', { path: '/test' });
-    preparePayloadRoute('PATCH', { path: '/test' });
-    preparePayloadRoute('DELETE', { path: '/test' });
-
-    const streamPayload = {
-      path: '/test-stream',
-      config: {
-        payload: {
-          output: 'stream',
-          parse: false
-        }
-      }
-    };
-
-    preparePayloadRoute('POST', streamPayload);
-    preparePayloadRoute('PUT', streamPayload);
-    preparePayloadRoute('PATCH', streamPayload);
-    preparePayloadRoute('DELETE', streamPayload);
-
-    server.start(() => callback(null, server));
-  };
-
-  server.register({
-    register: require('../../'),
+  await server.register({
+    plugin: require('../../'),
     options: pluginOptions
-  },
-  err => {
-    if (err) { return callback(err); }
-
-    onRegister()
   });
+
+  server.route({
+    method: 'GET',
+    path: '/test',
+    handler: function (request, h) {
+      return request.query;
+    }
+  });
+
+  preparePayloadRoute('POST', { path: '/test' });
+  preparePayloadRoute('PUT', { path: '/test' });
+  preparePayloadRoute('PATCH', { path: '/test' });
+  preparePayloadRoute('DELETE', { path: '/test' });
+
+  const streamPayload = {
+    path: '/test-stream',
+    config: {
+      payload: {
+        output: 'stream',
+        parse: false
+      }
+    }
+  };
+
+  preparePayloadRoute('POST', streamPayload);
+  preparePayloadRoute('PUT', streamPayload);
+  preparePayloadRoute('PATCH', streamPayload);
+  preparePayloadRoute('DELETE', streamPayload);
+
+  return server;
 };
