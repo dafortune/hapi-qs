@@ -1,6 +1,6 @@
 {
   "name": "hapi-qs",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Hapi plugin to bring back qs support",
   "main": "index.js",
   "scripts": {
@@ -15,6 +15,12 @@
     "hapi-qs"
   ],
   "author": "Damian Andres Fortuna",
+  "contributors": [
+    {
+      "name": "Rajiv Makhijani",
+      "email": "rajiv@auditboard.com"
+    }
+  ],
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/daf-spr/hapi-qs/issues"

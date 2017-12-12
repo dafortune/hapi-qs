@@ -30,7 +30,6 @@ const payloadExamples = function (method, isMultipart, stripTrailingSlash) {
               requestOptions.headers = formData.getHeaders();
               formData = await streamToPromise(formData);
               requestOptions.payload = formData;
-              //console.log(requestOptions.payload);
           } else {
             requestOptions.headers = {
               'Content-Type': 'application/x-www-form-urlencoded'
