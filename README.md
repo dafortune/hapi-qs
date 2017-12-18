@@ -2,33 +2,30 @@
 
 [![Build Status](https://travis-ci.org/dafortune/hapi-qs.svg?branch=master)](https://travis-ci.org/dafortune/hapi-qs)
 
-Hapi plugin that brings back qs support for Hapi 12.
-[Qs](https://github.com/ljharb/qs) support has been removed from Hapi 12 (https://github.com/hapijs/hapi/issues/2985), this plugin aims to bring it back.
+[Hapi](http://hapijs.com) plugin that brings back [qs](https://github.com/ljharb/qs) support that was removed in Hapi 12 (https://github.com/hapijs/hapi/issues/2985).
+
+[__hapi-qs v1.1.3__](https://github.com/dafortune/hapi-qs/tree/v1.1.3) is for Hapi v12 to v16. __hapi-qs v2+__
+support Hapi v17 only.
 
 Install
 =======
 ```
 npm install hapi-qs
 ```
+Or for pre-Hapi 17:
+```
+npm install hapi-qs@1.1.3
+```
 
 Usage
 =====
-```javascript
-  const server = new Hapi.Server();
+``` javascript
+const server = new Hapi.Server();
 
-  server.connection({ port: port });
-
-  \\...
-
-  server.register({
-      register: require('hapi-qs'),
-      options: {} /* optional */
-    },
-    err => {
-      \\...
-    });
-
-  \\...
+await server.register({
+  plugin: require('hapi-forwarded-for'),
+  options: {} /* optional */
+});
 ```
 
 ### Parsing query
@@ -37,8 +34,8 @@ Usage
   server.route({
     method: 'GET',
     path: '/',
-    handler: function (request, reply) {
-      return reply(request.query); // request.query constains the parsed values
+    handler: (request, h) => {
+      return request.query; // request.query constains the parsed values
     }
   });
 ```
@@ -50,8 +47,8 @@ Payload will only be parsed if content-type is set to a kind of `x-www-form-urle
   server.route({
     method: 'POST',
     path: '/',
-    handler: function (request, reply) {
-      return reply(request.payload); // request.query constains the parsed values
+    handler: (request, h) => {
+      return request.payload; // request.query constains the parsed values
     }
   });
 ```

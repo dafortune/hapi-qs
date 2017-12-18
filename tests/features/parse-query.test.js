@@ -3,7 +3,7 @@
 const config = require('../support/basic_config');
 const rp = require('request-promise');
 const expect = require('chai').expect;
-
+const querystring = require('querystring')
 
 describe('Parsing query strings', function() {
   describe('when stripTrailingSlash is true', function() {
@@ -17,31 +17,23 @@ describe('Parsing query strings', function() {
 
 function parseQueryStringExample(stripTrailingSlash) {
   before(function() {
-    this.request = function(qs) {
-      return rp({
+    this.request = async function(qs) {
+      let res = await this.server.inject({
         method: 'GET',
-        uri: 'http://localhost:' + config.port + '/test' + (stripTrailingSlash ? '/' : ''),
-        qs: qs,
-        json: true
-      })
-      .then(body => {
-        this.query = body;
+        url: '/test' + (stripTrailingSlash ? '/' : '') + '?' + querystring.stringify(qs),
       });
+      return JSON.parse(res.payload);
     };
   });
 
   describe('when qsOptions are not set', function() {
 
-    before(function(done) {
-      this.serverStart(undefined, { stripTrailingSlash: stripTrailingSlash }, done);
+    before(async function() {
+      await this.serverStart(undefined, { stripTrailingSlash: stripTrailingSlash });
     });
 
-    after(function(done) {
-      this.server.stop(done);
-    });
-
-    beforeEach(function() {
-      return this.request({
+    beforeEach(async function() {
+      this.query = await this.request({
         'hello': 'world',
         'unicorns[0][color]': 'blue'
       });
@@ -61,16 +53,12 @@ function parseQueryStringExample(stripTrailingSlash) {
 
   describe('when qsOptions are set', function() {
 
-    before(function(done) {
-      this.serverStart({ qsOptions: { parseArrays: false } }, { stripTrailingSlash: stripTrailingSlash }, done);
+    before(async function() {
+      await this.serverStart({ qsOptions: { parseArrays: false } }, { stripTrailingSlash: stripTrailingSlash });
     });
 
-    after(function(done) {
-      this.server.stop(done);
-    });
-
-    beforeEach(function() {
-      return this.request({
+    beforeEach(async function() {
+      this.query = await this.request({
         'unicorns[0][color]': 'blue'
       });
     });
@@ -85,16 +73,12 @@ function parseQueryStringExample(stripTrailingSlash) {
 
   describe('when query strings parsing is disabled', function() {
 
-    before(function(done) {
-      this.serverStart({ queryString: false }, { stripTrailingSlash: stripTrailingSlash }, done);
+    before(async function() {
+      await this.serverStart({ queryString: false }, { stripTrailingSlash: stripTrailingSlash });
     });
 
-    after(function(done) {
-      this.server.stop(done);
-    });
-
-    beforeEach(function() {
-      return this.request({ 'unicorns[0][color]': 'blue' });
+    beforeEach(async function() {
+      this.query = await this.request({ 'unicorns[0][color]': 'blue' });
     });
 
     it('does not parse complex qs attribute', function() {
@@ -105,16 +89,12 @@ function parseQueryStringExample(stripTrailingSlash) {
 
   describe('when there is no query string', function() {
 
-    before(function(done) {
-      this.serverStart(undefined, { stripTrailingSlash: stripTrailingSlash }, done);
+    before(async function() {
+      await this.serverStart(undefined, { stripTrailingSlash: stripTrailingSlash });
     });
 
-    after(function(done) {
-      this.server.stop(done);
-    });
-
-    beforeEach(function() {
-      return this.request();
+    beforeEach(async function() {
+      this.query = await this.request();
     });
 
     it('does not fail', function() {
