@@ -23,7 +23,7 @@ Usage
 const server = new Hapi.Server();
 
 await server.register({
-  plugin: require('hapi-forwarded-for'),
+  plugin: require('hapi-qs'),
   options: {} /* optional */
 });
 ```
