@@ -21,7 +21,7 @@
   },
   "homepage": "https://github.com/daf-spr/hapi-qs#readme",
   "dependencies": {
-    "joi": "^7.0.1",
+    "joi": "^12.0.0",
     "qs": "^6.0.1"
   },
   "devDependencies": {
