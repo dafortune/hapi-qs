@@ -1,6 +1,6 @@
 {
   "name": "hapi-qs",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Hapi plugin to bring back qs support",
   "main": "index.js",
   "scripts": {
