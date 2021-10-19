@@ -1,7 +1,7 @@
 {
   "name": "hapi-qs",
   "version": "2.0.1",
-  "description": "Hapi plugin to bring back qs support",
+  "description": "Hapi plugin to add form-encoded qs support",
   "main": "index.js",
   "scripts": {
     "test": "node_modules/mocha/bin/mocha \"tests/**/*.test.js\""
@@ -14,31 +14,22 @@
     "hapi",
     "hapi-qs"
   ],
-  "author": "Damian Andres Fortuna",
-  "contributors": [
-    {
-      "name": "Rajiv Makhijani",
-      "email": "rajiv@auditboard.com"
-    }
-  ],
+  "author": "Lob.com",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/daf-spr/hapi-qs/issues"
-  },
-  "homepage": "https://github.com/daf-spr/hapi-qs#readme",
+  "homepage": "https://github.com/lob/hapi-qs",
   "dependencies": {
     "joi": "^13.1.2",
     "qs": "^6.0.1"
   },
   "devDependencies": {
+    "@hapi/hapi": "^18.4.1",
     "chai": "^3.4.1",
     "form-data": "^2.3.1",
-    "hapi": "^17.1.1",
     "mocha": "^2.3.4",
     "request-promise": "^1.0.2",
     "stream-to-promise": "^2.2.0"
   },
   "peerDependencies": {
-    "hapi": ">=17.x.x"
+    "hapi": ">=18.x.x"
   }
 }
