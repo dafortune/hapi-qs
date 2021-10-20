@@ -1,0 +1,53 @@
+name: "Hapi Qs CI"
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  ci:
+    name: Build & Test
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [12, 14, 16]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Use Node ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run linter
+        run: npm run lint
+
+      - name: Run tests
+        run: npm run test
+
+      # Run tests in a container. Gives us better test coverage by covering the in-container and non-container code paths
+      - name: Run container tests
+        run: |
+          docker run -t -w /logger-node -v ${{ github.workspace }}:/logger-node node:${{ matrix.node-version }} /bin/sh -c 'npm install && npm run test'
+
+      - name: Enforce coverage
+        run: npm run enforce
+
+      - name: Compress coverage directory
+        run: test -d coverage && tar czvf coverage.tar.gz coverage
+
+      - name: Archive code coverage results
+        uses: actions/upload-artifact@v2
+        with:
+          name: code-coverage-report
+          path: coverage.tar.gz

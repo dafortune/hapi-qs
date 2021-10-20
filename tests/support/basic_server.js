@@ -9,19 +9,19 @@ exports.start = async (port, pluginOptions, serverOptions) => {
 
   const server = new Hapi.Server({
     router: {
-      stripTrailingSlash: !!serverOptions.stripTrailingSlash
+      stripTrailingSlash: Boolean(serverOptions.stripTrailingSlash)
     }
   });
 
   const preparePayloadRoute = function (method, options) {
     server.route({
-      method: method,
+      method,
       path: options.path,
       config: {
         payload: Object.assign({}, options.config && options.config.payload),
-        handler: function (request, h) {
+        handler: function (request) {
           if (request.payload instanceof stream.Readable) {
-              return streamToPromise(request.payload);
+            return streamToPromise(request.payload);
           }
           return request.payload;
         }
@@ -37,7 +37,7 @@ exports.start = async (port, pluginOptions, serverOptions) => {
   server.route({
     method: 'GET',
     path: '/test',
-    handler: function (request, h) {
+    handler: function (request) {
       return request.query;
     }
   });

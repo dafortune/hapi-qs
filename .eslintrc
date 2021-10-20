@@ -1,0 +1,17 @@
+{
+  "extends": "lob",
+  "globals": {
+    "expect": false,
+    "Factory": true
+  },
+  "parserOptions": {
+    "ecmaVersion": 2020
+  },
+  "rules": {
+    "space-after-keywords": 0,
+    "space-return-throw-case": 0,
+    "no-arrow-condition": 0,
+    "no-shadow": 0,
+    "indent": ["error", 2, { "MemberExpression": "off" }]
+  }
+}

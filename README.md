@@ -1,21 +1,18 @@
 # Hapi QS
 
-[![Build Status](https://travis-ci.org/dafortune/hapi-qs.svg?branch=master)](https://travis-ci.org/dafortune/hapi-qs)
-
-[Hapi](http://hapijs.com) plugin that brings back [qs](https://github.com/ljharb/qs) support that was removed in Hapi 12 (https://github.com/hapijs/hapi/issues/2985).
-
-[__hapi-qs v1.1.3__](https://github.com/dafortune/hapi-qs/tree/v1.1.3) is for Hapi v12 to v16. __hapi-qs v2+__
-support Hapi v17 only.
+[Hapi](http://hapijs.com) plugin that adds [qs](https://github.com/ljharb/qs) support for form data in hapi 18.
+Fork of [hapi-qs](github.com/daf-spr/hapi-qs).
 
 Install
 =======
 ```
-npm install hapi-qs
+npm install @lob/hapi-qs
 ```
-Or for pre-Hapi 17:
-```
-npm install hapi-qs@1.1.3
-```
+
+Hapi 18+
+=====
+As of Hapi 18, there is built-in support for [providing a query string parser](https://hapi.dev/api?v=18.4.2#-serveroptionsqueryparser),
+but there is still a need for parsing form payloads.
 
 Usage
 =====
@@ -26,18 +23,6 @@ await server.register({
   plugin: require('hapi-qs'),
   options: {} /* optional */
 });
-```
-
-### Parsing query
-
-```javascript
-  server.route({
-    method: 'GET',
-    path: '/',
-    handler: (request, h) => {
-      return request.query; // request.query constains the parsed values
-    }
-  });
 ```
 
 ### Parsing payload
@@ -55,7 +40,6 @@ Payload will only be parsed if content-type is set to a kind of `x-www-form-urle
 
 ### Options
   * qsOptions (default `undefined`): This object is past directly to Qs parse method ([more info](https://github.com/ljharb/qs))
-  * queryString (default `true`): whether to parse query string
   * payload: whether to parse payload (it is valid only when content-type header is a kind of `x-www-form-urlencoded` or `multipart/form-data`)
 
 
